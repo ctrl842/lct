@@ -1,0 +1,141 @@
+body{
+    margin: 0;
+    display: block;
+    background-color: #080C25;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.container {
+    max-width: 1800px;
+    padding-left: 10px; padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.titles {
+    margin-top: 40px;
+    font-size: 70px;
+    font-family: 'Shentox', sans-serif;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+}
+
+.flex_blocks {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#upload_file {
+    flex-direction: column;
+}
+
+#files_input {
+    display: none;
+}
+
+.links_input {
+    margin-top: 80px;
+    width: 600px;
+    height: 60px;
+    color: white;
+    background-color: #293659;
+    border: solid 2px #15497E;
+    outline:none;
+    font-family: 'discet', sans-serif;
+    font-size: 20px;
+    text-align: center;
+}
+input:focus {
+    outline: #3071E7;
+    border-color: #3071E7;
+}
+
+.text {
+    margin-top: 20px;
+    font-size: 20px;
+    font-family: 'discet', sans-serif;
+    text-align: center;
+    color: white;
+}
+
+.upload_btn {
+    margin-top: 20px;
+    width: 250px;
+    height: 60px;
+    font-weight: 400;
+    font-family: 'Shentox', sans-serif;
+    font-size: 20px;
+    border-color: #FFD600;
+    border-width: max(2px, 0.10vw);
+    border-style: solid;
+    color: white;
+    text-align: center;
+    transition: all .2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.upload_btn:hover {
+    background-color: #FFD600;
+    color: black;
+}
+
+.send_btn {
+    margin-top: 40px;
+    color: #080C25;
+    background-color: #FFD600;
+}
+
+.send_btn:hover {
+    background-color: #fade4e;
+}
+
+.case_block {
+    margin-top: 20px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.img_block {
+    flex-direction: column;
+    width: 40%;
+}
+
+.imgs_size {
+    width: 100%;
+}
+
+.btn_block {
+    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+@font-face {
+	font-family: 'Shentox';  
+	src: url("/static/fonts/Shentox-Regular.ttf") format("truetype"); 
+	font-style: normal; 
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: 'discet';  
+	src: url("/static/fonts/Disket-Mono-Regular.ttf") format("truetype"); 
+	font-style: normal; 
+	font-weight: normal;
+ }

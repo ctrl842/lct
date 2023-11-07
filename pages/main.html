@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection of armed people</title>
+    <link rel="stylesheet" href="/static/style/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="titles">Детекция вооружённых людей <br> с помощью нейронной сети</div>
+        <form id="upload_file" class="flex_blocks" method="post" enctype="multipart/form-data">
+            <input class="links_input" id="link" name="link" type="text" placeholder="Введите ссылку формата rtsp"/>
+            <div class="text">ИЛИ</div>
+            <label for="files_input" class="flex_blocks upload_btn" id="upl_text">Загрузите видео</label>
+            <input id="files_input" name="file" type="file" accept="video/*" multiple/>
+            <button type="submit" class="flex_blocks upload_btn send_btn" id="send">Отправить</button>
+        </form>
+        <div class="titles" style="margin-top: 80px; font-size: 40px;">Распознанные случаи: </div>
+        <!-- место для случаев, вставляет js -->
+        <a href="" class="flex_blocks upload_btn send_btn" style="margin: 80px;">Скачать архив распознанных случаев</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/static/scripts/main.js"></script>
+</body>
+</html>
