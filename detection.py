@@ -38,11 +38,13 @@ def detect_video_files(files, savepath, thrall, thrbest, timethr):
         results = MODEL.track(file, stream=True)
 
         # get objects
+        stamps = np.array([])
         allobjects = np.array([])
         for i, res in enumerate(results):
             if res.boxes.cls.shape[0] == 1:
                 if res.boxes.conf > thrall:
                     timestamp = i // fps
+                    stamps = np.append(timestamp)
                     allobjects = np.append(
                         allobjects,
                         VideoDetectionResult(
@@ -51,7 +53,6 @@ def detect_video_files(files, savepath, thrall, thrbest, timethr):
                     )
 
         # obtain sequences using time threshold
-        stamps = np.array([x.timestamp for x in allobjects])
         diffs = np.diff(stamps)
         seqs = []
         len = 0
