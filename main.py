@@ -5,23 +5,21 @@ import os
 import cv2
 
 app = Flask(__name__, template_folder='pages')
-
-camera = cv2.VideoCapture('rtsp://rtsp:Rtsp1234@188.170.176.190:8027/Streaming/Channels/101?transportmode=unicast')
+    
 
 def gen_frames():
     while True:
- #   frame frame loop read the data of the camera
+        # I think there needs to be a button to stop this
+        rtsp_url = 'rtsp://rtsp:Rtsp1234@188.170.176.190:8027/Streaming/Channels/101?transportmode=unicast'
         try:
-            success, frame = camera.read()
-            if not success:
-                break
-            else:
-                ret, buffer = cv2.imencode('.jpg', frame)
-                frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        except:
-            print("help me pls")
+            success, frame = cv2.VideoCapture(rtsp_url).read()
+        except Exception:
+                continue
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
  
  
 @app.route('/video_start')
