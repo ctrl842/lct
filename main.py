@@ -1,9 +1,33 @@
-from flask import Flask, request, render_template, make_response, redirect, url_for
+from flask import Flask, request, Response, render_template, make_response, redirect, url_for
 from werkzeug.utils import secure_filename
 import json
 import os
+import cv2
 
 app = Flask(__name__, template_folder='pages')
+
+camera = cv2.VideoCapture('rtsp://rtsp:Rtsp1234@188.170.176.190:8027/Streaming/Channels/101?transportmode=unicast')
+
+def gen_frames():
+    while True:
+ #   frame frame loop read the data of the camera
+        try:
+            success, frame = camera.read()
+            if not success:
+                break
+            else:
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        except:
+            print("help me pls")
+ 
+ 
+@app.route('/video_start')
+def video_start():
+ # By returning an image of a frame of frame, it reaches the purpose of watching the video. Multipart / X-Mixed-Replace is a single HTTP request - response mode, if the network is interrupted, it will cause the video stream to terminate, you must reconnect to recover
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/')
 def index():
