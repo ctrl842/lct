@@ -4,9 +4,11 @@ $(function() {
         $('#link').prop('disabled', true);
         console.log(files_name);
     });
+
     $('#link').change(function() {
         $('#files_input').prop('disabled', true);
-    });
+    }); 
+
     $("#upload_file").on("submit", function(event) {
         var form_data = new FormData(this); // получаем файлики с формы
         $.ajax({
@@ -32,18 +34,39 @@ $(function() {
             success: function(data) {
                 console.log(data);
                 $("#send").text("Загружено");
+
+                var arrow_left = $(".nav_arrow").eq(0);
+                var arrow_right = $(".nav_arrow").eq(1);
+                var main_img = $(".imgs_size:last");
+                var num = $(".text:last");
+
+                main_img.attr("src", data[0][1]);
+                var i = 0;
+
+                console.log(arrow_left, arrow_right, num);
+                arrow_right.on("click", function(){
+                    if (i < data.length - 1) {
+                        i++;
+                        main_img.attr("src", data[i][1]);
+                        num.text((i + 1) + "/" + data.length);
+                    }
+                });
+                arrow_left.on("click", function(){
+                    if (i >= data.length - 1) {
+                        i--;
+                        main_img.attr("src", data[i][1]);
+                        num.text((i + 1) + "/" + data.length);
+                    }
+                });
+
+                /*
                 for (var i = 0; i < data.length; i++) {
                     $(".titles").eq(1).after(`
                     <div class="flex_blocks case_block">
                         <div class="flex_blocks img_block">
                             <img class="imgs_size" src="${data[i][1]}"/>
                             <div class="text">время распознавания ${data[i][0]}<br></div>
-                        </div>
-                        <div class="btn_block">
-                            <div class="text">Распознавание нейросетью: </div>
-                            <div class="flex_blocks upload_btn">Верно</div>
-                            <div class="flex_blocks upload_btn">Ошибка</div>
-                        </div>   
+                        </div>  
                     </div>
                     `);
                     console.log($(".case_block .upload_btn").eq(1));
@@ -76,7 +99,6 @@ $(function() {
                         );
                     });
 
-                    /*
                     var img = $(".imgs_size").eq(0);
                         console.log(img.prop('naturalWidth'));
                         var widthK = img.prop('naturalWidth') / img.prop("width");
@@ -86,10 +108,11 @@ $(function() {
                                 y = e.pageY;
                             console.log(`${(x - img.offset().left) * widthK}:${(y - img.offset().top) * heightK}`);
                         });
-                    */
                 };
+                */
             },
         });
         event.preventDefault();
     });
+
 });

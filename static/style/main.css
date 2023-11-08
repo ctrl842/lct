@@ -108,8 +108,30 @@ input:focus {
     flex-wrap: nowrap;
 }
 
-.img_block {
+.carusel_block {
     flex-direction: column;
+}
+
+.nav_arrow {
+    cursor: pointer;
+    width: 70px;
+    filter: invert(1);
+}
+
+.information_block {
+
+}
+
+.page_num {
+    margin-right: 20px;
+    width: fit-content;
+    padding: 10px;
+    color: black;
+    background-color: white;
+    border-radius: 3px;
+}
+
+.img_block {
     width: 40%;
 }
 
@@ -118,11 +140,9 @@ input:focus {
 }
 
 .btn_block {
-    margin-left: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     flex-wrap: nowrap;
 }
 
