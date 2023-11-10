@@ -1,112 +1,163 @@
 from ultralytics import YOLO
-import os
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 from datetime import timedelta
+import os
 import cv2
 import numpy as np
+import time
 
-MODEL = YOLO('./best.pt')
+MODEL = YOLO('./weights/best_china.pt')
 
 
-class VideoDetectionResult:
+class FrameDetectionResult:
     def __init__(self, videopath, timestamp, frame, conf, img):
         self.videopath = videopath
         self.timestamp = timestamp
         self.frame = frame
         self.conf = conf
         self.img = img
-        # self.feedback = False
 
     def save_image_timestamp(self, savepath):
         imgpath = os.path.join(savepath, f"{self.frame}.jpg")
         cv2.imwrite(imgpath, self.img)
-        return [str(timedelta(seconds = self.timestamp)), imgpath]
+        return (str(timedelta(seconds = self.timestamp)), "." + imgpath) 
+    
+class FileResult:
+
+    def __init__(self, input_filename):
+        
+        self.input_filename = input_filename
+        self.best_seqs = []
+        self.ok_seqs = []
+
+    def add_best_sequence(self, seq_dict):
+        self.best_seqs.append(seq_dict)
+    
+    def add_ok_sequence(self, seq_dict):
+        self.ok_seqs.append(seq_dict)
+
+        
 
 
 # function to map [videopaths] -> [best[sequence[timestamp, imgpath]], ok[sequence[timestamp, imgpath]]
 # files: list of videopaths; savepath: path to resulting dirs; thrall: detection confidence threshold;
 # thrbest: best results confidence threshold; timethr: time threshold in seconds to consider a sequence
-def detect_video_files(files, savepath, thrall, thrbest, timethr):
+
+def detect_video_files(files, upperpath, thrall, thrbest, timethr):
+
+    dirname = str(time.time())
+    dirpath = os.path.join(upperpath, dirname)
+
+
+    os.mkdir(dirpath)
+
+
+    file_results = []
 
     for file in files:
 
-        os.mkdir(os.path.join(savepath, file))
-        respath = os.path.join(savepath, file)
 
-        video = cv2.VideoCapture(file)
-        fps = video.get(cv2.CAP_PROP_FPS)
+        secfname = secure_filename(file.filename)
+        res_obj = FileResult(secfname)
 
-        results = MODEL.track(file, stream=True)
+        videodirpath = os.path.join(dirpath, secfname)
+        os.mkdir(videodirpath)
+
+        tmppath = os.path.join(videodirpath, "tmp")
+        outpath = os.path.join(videodirpath, "output")
+        os.mkdir(tmppath)
+        os.mkdir(outpath)
+
+        
+
+        filepath = os.path.join(tmppath, secfname)
+        
+        file.save(filepath)
+
+
+        videocap = cv2.VideoCapture(filepath)
+        fps = videocap.get(cv2.CAP_PROP_FPS)
+
+        results = MODEL.track(filepath, stream = True)
 
         # get objects
-        stamps = np.array([])
+            # with open(f'./resultsManual/labels/5.mp4_{i}.txt', '+w') as file:
+            #     for pred in res.boxes.xywhn:
+            #         file.write(f"0 {pred[0].item()} {pred[1].item()} {pred[2].item()} {pred[3].item()}\n")
+
         allobjects = np.array([])
         for i, res in enumerate(results):
             if res.boxes.cls.shape[0] == 1:
                 if res.boxes.conf > thrall:
                     timestamp = i // fps
-                    stamps = np.append(timestamp)
                     allobjects = np.append(
                         allobjects,
-                        VideoDetectionResult(
-                            file, timestamp, i, res.boxes.conf, res.plot()
+                        FrameDetectionResult(
+                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot()
                         ),
                     )
 
         # obtain sequences using time threshold
-        diffs = np.diff(stamps)
+
+        diffs = np.diff([x.timestamp for x in allobjects])
         seqs = []
-        len = 0
+
+        shift = 0
         for v in np.split(diffs, np.where(diffs[:-1] > timethr)[0] + 1):
             tmpseq = []
             for k in range(np.size(v)):
-                tmpseq.append(allobjects[len + k])
+                tmpseq.append(allobjects[shift + k])
             seqs.append(tmpseq)
-            len += np.size(v)
+            #del tmpseq
+            shift += np.size(v)
+        #del shift
 
         # split sequences by best confidence inside a sequence
         best_seqs = []
         ok_seqs = []
 
+        #seqs.insert(0, []) # best sequences
+        #seqs.insert(1, []) # ok sequences
+
         for seq in seqs:
-            conf = max([x.conf for x in seq])
+            conf = np.max([x.conf for x in seq])
             if conf > thrbest:
                 best_seqs.append(seq)
+                #seqs[0].insert(ind + 2, seqs.pop(ind + 2))
+                #seqs.pop(ind)
             else:
+                #seqs[1].insert(ind + 2, seqs.pop(ind + 2))
+                #seqs[1].insert(ind, seq)
+                #seqs.pop(ind)
                 ok_seqs.append(seq)
 
         # transform sequences into lists of timestamp and filepaths
-        os.mkdir(os.path.join(respath, "best"))
-        bestpath = os.path.join(respath, "best")
-        os.mkdir(os.path.join(respath, "ok"))
-        okpath = os.path.join(respath, "ok")
-        best_lists = []
-        ok_lists = []
+
+        bestpath = os.path.join(outpath, "best")
+        okpath = os.path.join(outpath, "ok")
+
+        os.mkdir(os.path.join(outpath, "best"))
+        os.mkdir(os.path.join(outpath, "ok"))
+        
+
         for i, seq in enumerate(best_seqs):
             os.mkdir(os.path.join(bestpath, f"{i}"))
             path = os.path.join(bestpath, f"{i}")
-            best_lists.append([x.save_image_timestamp(path) for x in seq])
+            res_obj.add_best_sequence(dict([x.save_image_timestamp(path) for x in seq]))
         for i, seq in enumerate(ok_seqs):
             os.mkdir(os.path.join(okpath, f"{i}"))
             path = os.path.join(okpath, f"{i}")
-            ok_lists.append([x.save_image_timestamp(path) for x in seq])
+            res_obj.add_ok_sequence(dict([x.save_image_timestamp(path) for x in seq]))
 
-    return [best_lists, ok_lists]
 
-"""
-Speed: 3.1ms preprocess, 10.1ms inference, 1.0ms postprocess per image at shape (1, 3, 384, 640)
+        print(res_obj.ok_seqs)
+        
+        file_results.append(res_obj.__dict__)
 
-[[],
- [[['0:00:34', 'save/test.mp4/ok/0/866.jpg'],
-   ['0:00:34', 'save/test.mp4/ok/0/867.jpg'],
-   ['0:00:36', 'save/test.mp4/ok/0/917.jpg'],
-   ['0:00:38', 'save/test.mp4/ok/0/954.jpg'],
-   ['0:00:38', 'save/test.mp4/ok/0/955.jpg'],
-   ['0:00:38', 'save/test.mp4/ok/0/967.jpg'],
-   ['0:00:38', 'save/test.mp4/ok/0/969.jpg'],
-   ['0:00:38', 'save/test.mp4/ok/0/971.jpg'],
-   ['0:00:39', 'save/test.mp4/ok/0/989.jpg'],
-   ['0:00:39', 'save/test.mp4/ok/0/990.jpg'],
-   ['0:00:39', 'save/test.mp4/ok/0/991.jpg'],
-   ['0:00:39', 'save/test.mp4/ok/0/992.jpg'],
-   ['0:00:39', 'save/test.mp4/ok/0/993.jpg']]]]
-"""
+        
+
+    return file_results
+
+
+#def processFeedback(feedback_string):

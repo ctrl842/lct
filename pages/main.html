@@ -9,41 +9,21 @@
 <body>
     <div class="container">
         <div class="titles">Детекция вооружённых людей <br> с помощью нейронной сети</div>
+
         <form id="upload_file" class="flex_blocks" method="post" enctype="multipart/form-data">
             <input class="links_input" id="link" name="link" type="text" placeholder="Введите ссылку формата rtsp"/>
             <div class="text">ИЛИ</div>
             <label for="files_input" class="flex_blocks upload_btn" id="upl_text">Загрузите видео</label>
-            <input id="files_input" name="file" type="file" accept="video/*" multiple/>
+            <input id="files_input" name="file" type="file" accept="video/*,.zip,.rar,.7zip,.7z" multiple/>
             <button type="submit" class="flex_blocks upload_btn send_btn" id="send">Отправить</button>
         </form>
-        <!--
-            <div class="row">
-                <div class="col-lg-8  offset-lg-2">
-                    <h3 class="mt-5">Live Streaming</h3>
-                    <img src="{{ url_for('video_start') }}" width="100%">
-                </div>
-            </div>
-        -->
-        <div class="titles" style="margin-top: 80px; font-size: 40px;">Распознанные случаи: </div>
+
+        <div class="titles" style="margin-top: 80px; font-size: 40px;">Обнаруженнное оружие</div>
         <!-- место для случаев, вставляет js -->
-        <div class="flex_blocks carusel_block">
-            <div class="flex_blocks img_block">
-                <img class="nav_arrow" src="../static/imgs/arrows.png" style="transform: rotate(180deg);"/>
-                <img class="imgs_size" src="../static/imgs/pic.jpeg" style="margin-left: 20px; margin-right: 20px;"/>
-                <img class="nav_arrow" src="../static/imgs/arrows.png"/>
-            </div>
-            <div class="flex_blocks information_block">
-                <div class="flex_blocks text page_num">3/5</div>
-                <div class="text">время распознавания</div>
-            </div>
-            
-            <div class="btn_block">
-                <div class="flex_blocks upload_btn">Верно</div>
-                <div class="flex_blocks upload_btn">Ошибка</div>
-            </div> 
-        </div>
-        <a href="" class="flex_blocks upload_btn send_btn" style="margin: 80px;">Скачать архив распознанных случаев</a>
+        <!--<a href="" class="flex_blocks upload_btn send_btn" style="margin: 80px;">Скачать архив распознанных случаев</a>-->
     </div>
+
+    
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="/static/scripts/main.js"></script>
 </body>

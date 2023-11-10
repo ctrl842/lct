@@ -109,6 +109,7 @@ input:focus {
 }
 
 .carusel_block {
+    margin-top: 40px;
     flex-direction: column;
 }
 
@@ -116,10 +117,6 @@ input:focus {
     cursor: pointer;
     width: 70px;
     filter: invert(1);
-}
-
-.information_block {
-
 }
 
 .page_num {
