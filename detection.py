@@ -70,12 +70,12 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
 
 
         secfname = secure_filename(file.filename)
-        res_obj = FileResult(secfname)
+        
 
         #secfname_orig = secfname
         secfname = unidecode(secfname)
         secfname = secfname.replace(" ", "_")
-
+        res_obj = FileResult(secfname)
         
 
         videodirpath = os.path.join(dirpath, secfname)
@@ -125,13 +125,16 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
                     allobjects = np.append(
                         allobjects,
                         FrameDetectionResult(
-                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot(conf = False, labels = False)
+                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot() # conf = False, labels = False
                         ),
                     )
                     #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
-                    pred_video.write(res.plot(conf = False, labels = False))
+                    pred_video.write(res.plot()) # conf = False, labels = False
+                else:
+                    pred_video.write(res.orig_img)
             #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
-            pred_video.write()
+            else:
+                pred_video.write(res.orig_img)
 
         pred_video.release()
         shutil.rmtree(tmppath)

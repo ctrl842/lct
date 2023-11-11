@@ -85,6 +85,11 @@ $(function() {
                                     <div class="flex_blocks text page_num">1/${carousel.length}</div>
                                     <div class="text">время распознавания: ${carousel[0][0]}</div>
                                 </div>
+                                </div> 
+                                <div class="btn_block">
+                                    <div class="flex_blocks upload_btn mark_btn">Верно</div>
+                                    <div class="flex_blocks upload_btn mark_btn">Ошибка</div>
+                                </div> 
                             </div>
                             `)
                             let arrow_left = $(".nav_arrow").eq(-2);
@@ -116,7 +121,7 @@ $(function() {
                         }
         
                         $(".container").append(`
-                            <div class="titles little_title anim_slide">Помогите нам улучшить распознавание</div>
+                            <div class="titles little_title anim_slide">Помогите нам улучшить распознавание, отметив неверные случаи </div>
                         `);
         
                         for (let j = 0; j < data[i]["ok_seqs"].length; j++) { // добавляем карусели для не гарантированных случев

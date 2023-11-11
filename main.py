@@ -39,7 +39,7 @@ def upload_file():
     files = request.files.getlist("file") #  получаем файлы
     print(files)
     if(request.files): # Если получили файлы
-        return json.dumps(detection.detect_video_files(files, "./static/results/", 0.2, 0.65, 3))
+        return json.dumps(detection.detect_video_files(files, "./static/results/", 0.3, 0.7, 3))
     else: # Если ничего не получили TODO: (не работает)
         return "Пустой запрос!"
         
