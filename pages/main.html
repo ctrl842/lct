@@ -8,22 +8,27 @@
 </head>
 <body>
     <div class="container">
-        <div class="titles">Детекция вооружённых людей <br> с помощью нейронной сети</div>
+        <div class="titles">Wunderwaffle <br> детекция вооруженных людей</div>
 
         <form id="upload_file" class="flex_blocks" method="post" enctype="multipart/form-data">
             <input class="links_input" id="link" name="link" type="text" placeholder="Введите ссылку формата rtsp"/>
-            <div class="text">ИЛИ</div>
+            <div class="text" style="margin-top: 20px;">ИЛИ</div>
             <label for="files_input" class="flex_blocks upload_btn" id="upl_text">Загрузите видео</label>
-            <input id="files_input" name="file" type="file" accept="video/*,.zip,.rar,.7zip,.7z" multiple/>
+            <input id="files_input" name="file" type="file" accept="video/*" multiple/>
             <button type="submit" class="flex_blocks upload_btn send_btn" id="send">Отправить</button>
         </form>
 
-        <div class="titles" style="margin-top: 80px; font-size: 40px;">Обнаруженнное оружие</div>
+        <div class="loading_block">
+            <div class="text">Пожалуйста подождите, это может занять несколько минут</div>
+            <img src="../static/imgs/loading (1).png" id="loading"/>
+        </div>
+        
+
         <!-- место для случаев, вставляет js -->
-        <!--<a href="" class="flex_blocks upload_btn send_btn" style="margin: 80px;">Скачать архив распознанных случаев</a>-->
+        <!---->
     </div>
 
-    
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="/static/scripts/main.js"></script>
 </body>

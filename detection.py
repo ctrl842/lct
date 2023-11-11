@@ -5,9 +5,13 @@ from datetime import timedelta
 import os
 import cv2
 import numpy as np
+from unidecode import unidecode
 import time
+import shutil
+import json
+import sys
 
-MODEL = YOLO('./weights/best_china.pt')
+MODEL = YOLO("./weights/final.pt")
 
 
 class FrameDetectionResult:
@@ -31,11 +35,15 @@ class FileResult:
         self.best_seqs = []
         self.ok_seqs = []
 
-    def add_best_sequence(self, seq_dict):
-        self.best_seqs.append(seq_dict)
+    def add_best_sequence(self, seq_tuples_list):
+        self.best_seqs.append(seq_tuples_list)
     
-    def add_ok_sequence(self, seq_dict):
-        self.ok_seqs.append(seq_dict)
+    def add_ok_sequence(self, seq_tuples_list):
+        self.ok_seqs.append(seq_tuples_list)
+
+    def __repr__(self):
+        return f"FileResult(input_filename={self.input_filename}, best_seqs={self.best_seqs}, ok_seqs={self.ok_seqs})"
+
 
         
 
@@ -49,11 +57,14 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
     dirname = str(time.time())
     dirpath = os.path.join(upperpath, dirname)
 
+    #to_train_path = os.path.join("to_train/", dirname)
 
-    os.mkdir(dirpath)
+    if not os.path.exists(dirpath):
+        os.mkdir(dirpath)
+        #os.mkdir(to_train_path)
 
 
-    file_results = []
+    file_results = [dirname]
 
     for file in files:
 
@@ -61,11 +72,17 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
         secfname = secure_filename(file.filename)
         res_obj = FileResult(secfname)
 
+        #secfname_orig = secfname
+        secfname = unidecode(secfname)
+        secfname = secfname.replace(" ", "_")
+
+        
+
         videodirpath = os.path.join(dirpath, secfname)
         os.mkdir(videodirpath)
 
         tmppath = os.path.join(videodirpath, "tmp")
-        outpath = os.path.join(videodirpath, "output")
+        outpath = os.path.join(videodirpath, "frame_sequences")
         os.mkdir(tmppath)
         os.mkdir(outpath)
 
@@ -78,26 +95,47 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
 
         videocap = cv2.VideoCapture(filepath)
         fps = videocap.get(cv2.CAP_PROP_FPS)
+        video_w = int(videocap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        video_h = int(videocap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        #encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-        results = MODEL.track(filepath, stream = True)
+        print(video_w)
+        print(video_h)
+
+        results = MODEL.track(filepath, device = 0, stream = True)
+        
+        
 
         # get objects
+            # save labels
             # with open(f'./resultsManual/labels/5.mp4_{i}.txt', '+w') as file:
             #     for pred in res.boxes.xywhn:
             #         file.write(f"0 {pred[0].item()} {pred[1].item()} {pred[2].item()} {pred[3].item()}\n")
-
+        pred_video = cv2.VideoWriter(os.path.join(videodirpath, secfname), fourcc, fps, (video_w, video_h))
         allobjects = np.array([])
         for i, res in enumerate(results):
+            
             if res.boxes.cls.shape[0] == 1:
                 if res.boxes.conf > thrall:
+                    #with open(os.path.join(to_train_path, f"{i}.txt"), '+w') as txt_file:
+                        #for pred in res.boxes.xywhn:
+                            #txt_file.write(f"0 {pred[0].item()} {pred[1].item()} {pred[2].item()} {pred[3].item()}\n")
                     timestamp = i // fps
                     allobjects = np.append(
                         allobjects,
                         FrameDetectionResult(
-                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot()
+                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot(conf = False, labels = False)
                         ),
                     )
+                    #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
+                    pred_video.write(res.plot(conf = False, labels = False))
+            #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
+            pred_video.write()
 
+        pred_video.release()
+        shutil.rmtree(tmppath)
+        #shutil.move(f"./runs/detect/predict/{secfname}", os.path.join(videodirpath, secfname))
         # obtain sequences using time threshold
 
         diffs = np.diff([x.timestamp for x in allobjects])
@@ -108,32 +146,27 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
             tmpseq = []
             for k in range(np.size(v)):
                 tmpseq.append(allobjects[shift + k])
-            seqs.append(tmpseq)
-            #del tmpseq
+            if len(tmpseq) > 2*fps:
+                seqs.append(tmpseq)
+            del tmpseq
             shift += np.size(v)
-        #del shift
+        del shift
 
         # split sequences by best confidence inside a sequence
         best_seqs = []
         ok_seqs = []
 
-        #seqs.insert(0, []) # best sequences
-        #seqs.insert(1, []) # ok sequences
 
         for seq in seqs:
             conf = np.max([x.conf for x in seq])
             if conf > thrbest:
                 best_seqs.append(seq)
-                #seqs[0].insert(ind + 2, seqs.pop(ind + 2))
-                #seqs.pop(ind)
             else:
-                #seqs[1].insert(ind + 2, seqs.pop(ind + 2))
-                #seqs[1].insert(ind, seq)
-                #seqs.pop(ind)
                 ok_seqs.append(seq)
+        print(ok_seqs)
 
-        # transform sequences into lists of timestamp and filepaths
 
+        # transform sequences into lists of timestamp and filepaths and save frames
         bestpath = os.path.join(outpath, "best")
         okpath = os.path.join(outpath, "ok")
 
@@ -144,14 +177,12 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
         for i, seq in enumerate(best_seqs):
             os.mkdir(os.path.join(bestpath, f"{i}"))
             path = os.path.join(bestpath, f"{i}")
-            res_obj.add_best_sequence(dict([x.save_image_timestamp(path) for x in seq]))
+            res_obj.add_best_sequence([x.save_image_timestamp(path) for x in seq])
         for i, seq in enumerate(ok_seqs):
             os.mkdir(os.path.join(okpath, f"{i}"))
             path = os.path.join(okpath, f"{i}")
-            res_obj.add_ok_sequence(dict([x.save_image_timestamp(path) for x in seq]))
+            res_obj.add_ok_sequence([x.save_image_timestamp(path) for x in seq])
 
-
-        print(res_obj.ok_seqs)
         
         file_results.append(res_obj.__dict__)
 
@@ -160,4 +191,15 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
     return file_results
 
 
-#def processFeedback(feedback_string):
+#def process_feedback(feedback_json):
+#   feedback_string = json.loads(feedback_json)
+
+#    filename = 
+
+def send_archive(timestamp):
+    path = os.path.join("./static/results", timestamp)
+    print(path)
+    shutil.make_archive(os.path.join("./static/results", timestamp), 'zip', path)
+    #shutil.rmtree(path)
+    return f"./static/results/{timestamp}.zip"
+

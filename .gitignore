@@ -1,4 +1,6 @@
 weights/
 uploads/
 results/
+__pycache__/
 jupyter/
+to_train/

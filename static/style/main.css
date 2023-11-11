@@ -2,6 +2,7 @@ body{
     margin: 0;
     display: block;
     background-color: #080C25;
+    margin: 10px;
 }
 
 *, *::before, *::after {
@@ -22,6 +23,47 @@ a {
     margin: 0 auto;
 }
 
+#loading {
+    filter: invert(1);
+    margin-top: 20px;
+    width: 100px;
+    transition: all 0.5s cubic-bezier(.19,1,.22,1);
+    animation: rotate 1s cubic-bezier(0.23, 1.03, 0.36, 0.81) infinite;
+}
+
+.loading_block {
+    align-items: center;
+    flex-direction: column;
+    display: none;
+}
+
+@keyframes rotate {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+  }
+
+.anim_slide {
+    animation-fill-mode:backwards;
+	animation-name: slide_anim;
+	animation-duration: 0.5s;
+	animation-timing-function: cubic-bezier(.19,1,.22,1);
+}
+
+@keyframes slide_anim {
+	0%{
+		transform: translate(-200px);
+		opacity: 0;
+	}
+	100%{
+		transform: translate(0);
+		opacity: 1;
+	}
+}
+
 .titles {
     margin-top: 40px;
     font-size: 70px;
@@ -31,6 +73,18 @@ a {
     color: white;
 }
 
+.big_title {
+    font-size: 70px;
+}
+.middle_title {
+    margin-top: 100px;
+    font-size: 60px;
+}
+.little_title {
+    margin-top: 40px;
+    font-size: 40px;
+}
+
 .flex_blocks {
     display: flex;
     justify-content: center;
@@ -38,6 +92,7 @@ a {
 }
 
 #upload_file {
+    width: 100%;
     flex-direction: column;
 }
 
@@ -109,6 +164,7 @@ input:focus {
 }
 
 .carusel_block {
+    width: 70%;
     margin-top: 40px;
     flex-direction: column;
 }
@@ -128,8 +184,12 @@ input:focus {
     border-radius: 3px;
 }
 
+.mark_btn:nth-child(2n) {
+    border-left: 0;
+}
+
 .img_block {
-    width: 40%;
+    width: 100%;
 }
 
 .imgs_size {
@@ -141,6 +201,51 @@ input:focus {
     justify-content: center;
     align-items: center;
     flex-wrap: nowrap;
+}
+
+@media(max-width:1000px){
+    .titles {
+        font-size: 50px;
+    }
+    .links_input {
+        width: 90%;
+    }
+    .carusel_block {
+        width: 100%;
+    }
+    .nav_arrow {
+        width: 40px;
+    }
+}
+
+@media(max-width:710px){
+    .titles {
+        font-size: 25px;
+    }
+    .links_input {
+        width: 90%;
+        font-size: 15px;
+    }
+    .middle_title {
+        font-size: 40px;
+    }
+    .little_title {
+        font-size: 25px;
+    }
+    .text {
+        margin-top: 10px;
+        font-size: 15px;
+    }
+    .mark_btn {
+        width: 140px;
+        margin-top: 10px;
+    }
+    .img_block {
+        width: 70%;
+    }
+    .page_num {
+        margin-right: 10px;
+    }
 }
 
 @font-face {
