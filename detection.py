@@ -125,11 +125,11 @@ def detect_video_files(files, upperpath, thrall, thrbest, timethr):
                     allobjects = np.append(
                         allobjects,
                         FrameDetectionResult(
-                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot() # conf = False, labels = False
+                            file, timestamp, i, res.boxes.conf.cpu().numpy(), res.plot(conf = False, labels = False) # conf = False, labels = False
                         ),
                     )
                     #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
-                    pred_video.write(res.plot()) # conf = False, labels = False
+                    pred_video.write(res.plot(conf = False, labels = False)) # conf = False, labels = False
                 else:
                     pred_video.write(res.orig_img)
             #cv2.imencode('.jpg', res.plot(conf = False, labels = False), encode_param)[1]
